@@ -1,0 +1,58 @@
+{
+  "Metadata": {
+    "title": "Family Dashboard",
+    "description": "The private dashboard for everyday family life."
+  },
+  "Common": {
+    "appName": "Family Dashboard",
+    "navigation": "Navigation",
+    "toggleNavigation": "Toggle navigation",
+    "skipContent": "Skip to content",
+    "accountUnavailable": "Account not connected yet",
+    "backHome": "Back to home"
+  },
+  "Navigation": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "Home": {
+    "title": "Home",
+    "intro": "A calm starting point for everything that will bring your family life together.",
+    "emptyTitle": "Your family dashboard starts here",
+    "emptyDescription": "Family modules will appear here once they are set up. Until then, the dashboard stays intentionally uncluttered."
+  },
+  "Settings": {
+    "title": "Settings",
+    "intro": "Adjust the appearance and language for this device.",
+    "appearanceTitle": "Appearance",
+    "appearanceDescription": "Choose a light, dark, or system-based appearance.",
+    "themeLabel": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "languageTitle": "Language",
+    "languageDescription": "The selection applies to the current view.",
+    "languageLabel": "Select language",
+    "languageDe": "German",
+    "languageEn": "English",
+    "languageBg": "Bulgarian"
+  },
+  "Theme": {
+    "label": "Change theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "Loading": {
+    "label": "Loading content"
+  },
+  "Error": {
+    "title": "Something went wrong",
+    "description": "The view could not be loaded. Please try again.",
+    "retry": "Try again"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has moved."
+  }
+}

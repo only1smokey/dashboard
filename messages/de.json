@@ -1,0 +1,58 @@
+{
+  "Metadata": {
+    "title": "Familienübersicht",
+    "description": "Die private Übersicht für den Familienalltag."
+  },
+  "Common": {
+    "appName": "Familienübersicht",
+    "navigation": "Navigation",
+    "toggleNavigation": "Navigation ein- oder ausblenden",
+    "skipContent": "Zum Inhalt springen",
+    "accountUnavailable": "Konto noch nicht verbunden",
+    "backHome": "Zur Startseite"
+  },
+  "Navigation": {
+    "home": "Startseite",
+    "settings": "Einstellungen"
+  },
+  "Home": {
+    "title": "Startseite",
+    "intro": "Ein ruhiger Ausgangspunkt für alles, was euren Familienalltag später zusammenführt.",
+    "emptyTitle": "Hier entsteht eure Familienübersicht",
+    "emptyDescription": "Familienmodule erscheinen an dieser Stelle, sobald sie eingerichtet wurden. Bis dahin bleibt die Übersicht bewusst aufgeräumt."
+  },
+  "Settings": {
+    "title": "Einstellungen",
+    "intro": "Passe Darstellung und Sprache für dieses Gerät an.",
+    "appearanceTitle": "Darstellung",
+    "appearanceDescription": "Wähle ein helles, dunkles oder systemabhängiges Erscheinungsbild.",
+    "themeLabel": "Farbschema",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "themeSystem": "System",
+    "languageTitle": "Sprache",
+    "languageDescription": "Die Auswahl gilt für die aktuelle Ansicht.",
+    "languageLabel": "Sprache auswählen",
+    "languageDe": "Deutsch",
+    "languageEn": "Englisch",
+    "languageBg": "Bulgarisch"
+  },
+  "Theme": {
+    "label": "Farbschema ändern",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "Loading": {
+    "label": "Inhalt wird geladen"
+  },
+  "Error": {
+    "title": "Etwas ist schiefgelaufen",
+    "description": "Die Ansicht konnte nicht geladen werden. Bitte versuche es erneut.",
+    "retry": "Erneut versuchen"
+  },
+  "NotFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Die gesuchte Seite existiert nicht oder wurde verschoben."
+  }
+}
