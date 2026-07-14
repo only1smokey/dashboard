@@ -1,13 +1,13 @@
-import { House, Settings } from "lucide-react";
+import { House, Settings, ShieldCheck, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export type ModuleId = "home" | "settings";
-export type NavigationLabelKey = "home" | "settings";
+export type ModuleId = "home" | "profile" | "settings" | "adminUsers";
+export type NavigationLabelKey = ModuleId;
 
 export interface DashboardModule {
   id: ModuleId;
   navigationLabel: NavigationLabelKey;
-  route: "/" | "/settings";
+  route: "/" | "/profile" | "/settings" | "/admin/users";
   icon: LucideIcon;
   order: number;
   visibleInNavigation: boolean;
@@ -24,12 +24,29 @@ export const moduleRegistry = [
     visibleInNavigation: true,
   },
   {
+    id: "profile",
+    navigationLabel: "profile",
+    route: "/profile",
+    icon: UserRound,
+    order: 90,
+    visibleInNavigation: true,
+  },
+  {
     id: "settings",
     navigationLabel: "settings",
     route: "/settings",
     icon: Settings,
     order: 100,
     visibleInNavigation: true,
+  },
+  {
+    id: "adminUsers",
+    navigationLabel: "adminUsers",
+    route: "/admin/users",
+    icon: ShieldCheck,
+    order: 110,
+    visibleInNavigation: true,
+    adminOnly: true,
   },
 ] as const satisfies readonly DashboardModule[];
 

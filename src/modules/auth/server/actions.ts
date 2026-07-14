@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { hasActiveRole } from "@/modules/auth/authorization";
-import { getLoginPath } from "@/modules/auth/routing";
+import { getDisabledAccountPath, getLoginPath } from "@/modules/auth/routing";
 import {
   forgotPasswordSchema,
   localeSchema,
@@ -72,25 +72,37 @@ export async function loginAction(input: unknown): Promise<AuthActionResult> {
     return { status: "error", error: "authenticationFailed" };
   }
 
-  const { data: authorization, error: authorizationError } = await supabase
-    .from("user_roles")
-    .select("role, is_active")
-    .eq("user_id", data.user.id)
-    .maybeSingle();
+  const [
+    { data: authorization, error: authorizationError },
+    { data: profile },
+  ] = await Promise.all([
+    supabase
+      .from("user_roles")
+      .select("role, is_active")
+      .eq("user_id", data.user.id)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("preferred_locale")
+      .eq("id", data.user.id)
+      .maybeSingle(),
+  ]);
+
+  if (authorizationError || !authorization) {
+    await supabase.auth.signOut();
+    return { status: "error", error: "authenticationFailed" };
+  }
 
   if (
-    authorizationError ||
-    !authorization ||
     !hasActiveRole({
       role: authorization.role,
       isActive: authorization.is_active,
     })
   ) {
-    await supabase.auth.signOut();
-    return { status: "error", error: "authenticationFailed" };
+    redirect(getDisabledAccountPath(profile?.preferred_locale ?? locale));
   }
 
-  redirect(`/${locale}`);
+  redirect(`/${profile?.preferred_locale ?? locale}`);
 }
 
 export async function requestPasswordResetAction(

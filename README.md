@@ -12,7 +12,7 @@ A production-ready foundation for a private family dashboard. The current applic
 - pnpm, ESLint, Prettier, and `prettier-plugin-tailwindcss`
 - Standalone Next.js output in a non-root Node.js container
 
-German (`de`) is the default locale. English (`en`) and Bulgarian (`bg`) are also available. Routes always include the locale, for example `/de` and `/de/settings`.
+German (`de`) is the default locale. English (`en`) and Bulgarian (`bg`) are also available. Routes always include the locale, for example `/de`, `/de/profile`, and `/de/admin/users`.
 
 ## Repository structure
 
@@ -73,7 +73,23 @@ The publishable key is intentionally safe to include in browser code: it identif
 
 Secret keys and legacy `service_role` keys have elevated access and can bypass normal data protections. Never put one in a `NEXT_PUBLIC_` variable, browser bundle, Docker build argument, Compose file, source file, log, or repository setting used here. This application does not need an elevated key for its current scope.
 
-The browser client is in `src/lib/supabase/client.ts`; the request-scoped Server Component, Server Action, and Route Handler client is in `src/lib/supabase/server.ts`. `src/lib/supabase/proxy.ts` validates and refreshes cookie-backed sessions and is composed with the locale proxy. Localized login, password recovery, logout, server route protection, active-role checks, and secure profile/role migrations are implemented. Follow [supabase/README.md](supabase/README.md) before attempting to sign in; the application deliberately fails closed until its migration is applied.
+The browser client is in `src/lib/supabase/client.ts`; the request-scoped Server Component, Server Action, and Route Handler client is in `src/lib/supabase/server.ts`. `src/lib/supabase/proxy.ts` validates and refreshes cookie-backed sessions and is composed with the locale proxy. Localized login, password recovery, logout, profile and avatar management, server route protection, active-account checks, and secure administrator operations are implemented. Follow [supabase/README.md](supabase/README.md) before attempting to sign in; the application deliberately fails closed until both migrations are applied.
+
+### Profiles and avatars
+
+Signed-in users can open `/<locale>/profile` to view their read-only Auth email, edit their display name, store a preferred language, and upload, replace, or remove an avatar. Profile actions update only `profiles.display_name` and `profiles.preferred_locale`; they cannot change user IDs, Auth email data, roles, or active status.
+
+The second migration creates a private `avatars` Storage bucket with a 2 MB stored-object limit and JPEG, PNG, WebP, and GIF MIME allowlist. Browser code resizes normal still images to a maximum 512-pixel edge before upload without an image-processing dependency. Storage RLS permits active authenticated family members to read avatar objects and permits writes only below the caller's `<user-id>/avatar.<extension>` folder. The database stores only that object path in `profiles.avatar_path`. The server creates five-minute signed display URLs; permanent signed URLs are never stored.
+
+Replacement is ordered so the new object is uploaded and verified before its path is committed. An old object with a different extension is then removed. If cleanup fails, the server attempts to restore the old path and remove the new object instead of silently accumulating obsolete files.
+
+### Administrator area
+
+Active administrators see the localized `/<locale>/admin/users` navigation item. The route is protected again in its server layout; hiding the item is not the authorization boundary. PostgreSQL RPC functions independently verify `auth.uid()` is an active admin and serialize checks that prevent self-deactivation and removal or deactivation of the final active admin. Direct application-client writes to `user_roles` remain revoked.
+
+The page lists profile data, preferred language, role, status, and creation date with responsive table and mobile-card layouts. Other users' email addresses are intentionally omitted because they cannot be retrieved from Supabase Auth with the publishable key. The area does not create, invite, delete, or change passwords for Supabase Auth users.
+
+To add Auth Admin operations in the future, use a server-only Supabase secret key in a carefully isolated backend. Such a key must never use a `NEXT_PUBLIC_` name, enter a Client Component graph, be embedded in the container image, or be exposed to the browser. No such key is requested or required by the current application.
 
 ### Verify client initialization
 
@@ -173,4 +189,4 @@ The Pine64 never runs `pnpm install`, `pnpm build`, or `next build`. Compilation
 
 ## Scope
 
-Authentication, profile storage, role storage, and authorization guards are present. Public registration, invitations, avatar management, administrative operations, and family dashboard modules remain deliberately deferred.
+Authentication, profile and private-avatar management, role storage, active-account enforcement, and basic user administration are present. Public registration, invitations, Auth user creation/deletion, Auth Admin APIs, and unrelated family dashboard modules remain deliberately out of scope.

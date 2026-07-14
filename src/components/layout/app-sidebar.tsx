@@ -1,6 +1,6 @@
 "use client";
 
-import { House, UserRound } from "lucide-react";
+import { House } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -19,8 +19,19 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, usePathname } from "@/i18n/navigation";
 import { navigationModules } from "@/modules/registry";
+import { MemberAvatar } from "@/components/shared/member-avatar";
 
-export function AppSidebar({ accountLabel }: { accountLabel: string }) {
+export function AppSidebar({
+  accountLabel,
+  avatarUrl,
+  displayName,
+  isAdmin,
+}: {
+  accountLabel: string;
+  avatarUrl: string | null;
+  displayName: string | null;
+  isAdmin: boolean;
+}) {
   const pathname = usePathname();
   const tCommon = useTranslations("Common");
   const tNavigation = useTranslations("Navigation");
@@ -47,31 +58,33 @@ export function AppSidebar({ accountLabel }: { accountLabel: string }) {
           <SidebarGroupLabel>{tCommon("navigation")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationModules.map((module) => {
-                const isActive =
-                  module.route === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(module.route);
+              {navigationModules
+                .filter((module) => !("adminOnly" in module) || isAdmin)
+                .map((module) => {
+                  const isActive =
+                    module.route === "/"
+                      ? pathname === "/"
+                      : pathname.startsWith(module.route);
 
-                return (
-                  <SidebarMenuItem key={module.id}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={tNavigation(module.navigationLabel)}
-                      className="h-11 md:h-9"
-                    >
-                      <Link
-                        href={module.route}
-                        onClick={() => setOpenMobile(false)}
+                  return (
+                    <SidebarMenuItem key={module.id}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={tNavigation(module.navigationLabel)}
+                        className="h-11 md:h-9"
                       >
-                        <module.icon aria-hidden="true" />
-                        <span>{tNavigation(module.navigationLabel)}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+                        <Link
+                          href={module.route}
+                          onClick={() => setOpenMobile(false)}
+                        >
+                          <module.icon aria-hidden="true" />
+                          <span>{tNavigation(module.navigationLabel)}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -81,7 +94,11 @@ export function AppSidebar({ accountLabel }: { accountLabel: string }) {
           className="text-muted-foreground flex min-h-11 items-center gap-3 px-1.5 text-sm group-data-[collapsible=icon]:justify-center"
           aria-label={accountLabel}
         >
-          <UserRound className="size-5 shrink-0" aria-hidden="true" />
+          <MemberAvatar
+            avatarUrl={avatarUrl}
+            displayName={displayName}
+            className="size-8"
+          />
           <span className="truncate group-data-[collapsible=icon]:hidden">
             {accountLabel}
           </span>

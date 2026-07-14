@@ -2,9 +2,11 @@
 
 The application is fail-closed: authenticated dashboard routes require a valid
 Supabase JWT plus an active row in `public.user_roles`. Login and authorization
-will not work until the migration in
-`migrations/20260714120000_auth_foundation.sql` is applied to the same Supabase
-project used by `.env.local`.
+will not work until both versioned migrations are applied to the same Supabase
+project used by `.env.local`:
+
+1. `migrations/20260714120000_auth_foundation.sql`
+2. `migrations/20260714160000_profiles_avatars_admin.sql`
 
 ## Apply the migration
 
@@ -15,11 +17,11 @@ so it was not applied automatically.
 
 1. Open the matching Supabase project.
 2. Open **SQL Editor > New query**.
-3. Copy the complete contents of
-   `migrations/20260714120000_auth_foundation.sql` into the query.
-4. Select **Run** once. Do not run isolated fragments.
-5. Confirm that `public.profiles` and `public.user_roles` exist and show RLS as
-   enabled in **Table Editor**.
+3. Copy and run the complete contents of the authentication-foundation migration.
+4. Open a new query, then copy and run the complete contents of the profiles,
+   avatars, and admin migration. Do not run isolated fragments or reverse the order.
+5. Confirm that `public.profiles` and `public.user_roles` exist with RLS enabled,
+   and that **Storage > Buckets** shows a private `avatars` bucket.
 
 ### Supabase CLI
 
@@ -49,9 +51,10 @@ application never needs a service-role key or database password at runtime.
    updated.
 6. Run the final `select` and verify `role = 'admin'` and `is_active = true`.
 
-The application exposes no role mutation operation. Future admin UI must use a
-separately designed, server-authorized operation rather than granting clients
-write access to `user_roles`.
+The first-admin SQL remains the bootstrap procedure because the admin RPCs
+correctly require an existing active administrator. After this one-time step,
+active admins can manage roles and active application access at
+`/<locale>/admin/users`.
 
 ## Required dashboard settings
 
@@ -76,8 +79,8 @@ In the matching Supabase project:
 ## Security model
 
 - `profiles` contains user-editable identity presentation data. Authenticated
-  users can read their own row and update only `display_name`, `avatar_path`,
-  and `preferred_locale`; active administrators can read family profiles.
+  users can read their own row and directly update only `display_name` and
+  `preferred_locale`; active administrators can read family profiles.
 - `user_roles` contains authorization data. Users can read their own role and
   active status; active administrators can read all roles. Neither receives
   insert, update, or delete privileges through the application API.
@@ -91,6 +94,28 @@ In the matching Supabase project:
   correct the migration or data problem, and retry user creation.
 - Existing Auth users are backfilled without overwriting any existing profile
   or role rows.
+- `avatars` is private and limited to 2 MB JPEG, PNG, WebP, and GIF objects.
+  Active members may read objects; insert, update, and delete policies require
+  the first path segment to equal `auth.uid()`. Only predictable
+  `<user-id>/avatar.<extension>` names are accepted for writes.
+- `public.set_own_avatar_path` verifies the caller is active, the path belongs
+  to that caller, and the object exists before storing only the object path.
+  Display URLs are short-lived signed URLs and are not database values.
+- Admin RPCs verify the caller through `auth.uid()` and `private.is_admin()`,
+  use an empty `search_path`, validate their inputs, and serialize final-admin
+  checks. Unnecessary function access is revoked. Direct `user_roles` writes
+  remain unavailable to authenticated clients.
+- Deactivation affects application access only; it does not disable or delete
+  the Supabase Auth identity. Protected server layouts redirect inactive users
+  to a localized disabled-account page where logout remains available.
+
+## Auth administration limitation
+
+The application does not create or invite Auth users, delete Auth identities,
+change passwords as an administrator, or expose Auth Admin APIs. Other users'
+Auth email addresses are therefore omitted from the admin page. Adding those
+operations later requires a Supabase secret key kept strictly in server-only
+code; never expose it through `NEXT_PUBLIC_` configuration or browser code.
 
 ## Type generation
 

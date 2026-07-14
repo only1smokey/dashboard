@@ -26,6 +26,9 @@ export async function AppShell({
       </a>
       <AppSidebar
         accountLabel={user.displayName ?? user.email ?? t("account")}
+        avatarUrl={user.avatarUrl}
+        displayName={user.displayName}
+        isAdmin={user.role === "admin"}
       />
       <SidebarInset id="main-content" className="min-w-0">
         <AppHeader locale={locale} />

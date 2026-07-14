@@ -38,6 +38,10 @@ export function getLoginPath(locale: AppLocale) {
   return `/${locale}/login`;
 }
 
+export function getDisabledAccountPath(locale: AppLocale) {
+  return `/${locale}/account-disabled`;
+}
+
 export function getSafeCallbackPath(
   locale: AppLocale,
   candidate: string | null,

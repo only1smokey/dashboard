@@ -7,6 +7,7 @@ import {
   getTranslations,
   setRequestLocale,
 } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 import { notFound } from "next/navigation";
 
 import { AppProviders } from "@/components/shared/app-providers";
@@ -68,9 +69,16 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>
       <body className="bg-background text-foreground min-h-svh overflow-x-hidden font-sans antialiased">
-        <NextIntlClientProvider messages={messages}>
-          <AppProviders>{children}</AppProviders>
-        </NextIntlClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NextIntlClientProvider messages={messages}>
+            <AppProviders>{children}</AppProviders>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

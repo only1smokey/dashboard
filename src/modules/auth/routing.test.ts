@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  getDisabledAccountPath,
   getLocalizedRoute,
   getLoginPath,
   getSafeCallbackPath,
@@ -12,6 +13,7 @@ test("builds locale-aware login redirects for every supported locale", () => {
   assert.equal(getLoginPath("de"), "/de/login");
   assert.equal(getLoginPath("en"), "/en/login");
   assert.equal(getLoginPath("bg"), "/bg/login");
+  assert.equal(getDisabledAccountPath("de"), "/de/account-disabled");
 });
 
 test("recognizes localized public auth routes without exposing app routes", () => {

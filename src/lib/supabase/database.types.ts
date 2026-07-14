@@ -47,7 +47,20 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      admin_set_user_active: {
+        Args: { p_is_active: boolean; p_target_user_id: string };
+        Returns: undefined;
+      };
+      admin_set_user_role: {
+        Args: { p_role: "user" | "admin"; p_target_user_id: string };
+        Returns: undefined;
+      };
+      set_own_avatar_path: {
+        Args: { p_avatar_path: string | null };
+        Returns: string | null;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
