@@ -17,7 +17,7 @@ export default async function LoginPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ status?: string; error?: string }>;
+  searchParams: Promise<{ status?: string; error?: string; next?: string }>;
 }) {
   const [{ locale }, query, access, t, tCommon] = await Promise.all([
     params,
@@ -44,7 +44,7 @@ export default async function LoginPage({
         {query.error === "invalid-callback" ? (
           <FormMessage>{t("invalidResetLink")}</FormMessage>
         ) : null}
-        <LoginForm />
+        <LoginForm nextPath={query.next} />
       </div>
     </AuthCard>
   );

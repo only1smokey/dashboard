@@ -1,0 +1,9 @@
+{
+	import /config/acme-email.caddy
+}
+
+{$APP_DOMAIN} {
+	import /config/tls-mode.caddy
+	encode zstd gzip
+	reverse_proxy dashboard:3000
+}

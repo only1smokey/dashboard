@@ -6,5 +6,9 @@ import type { Database } from "@/lib/supabase/database.types";
 export function createClient() {
   const { url, publishableKey } = getSupabaseConfig();
 
-  return createBrowserClient<Database>(url, publishableKey);
+  return createBrowserClient<Database>(url, publishableKey, {
+    auth: {
+      experimental: { passkey: true },
+    },
+  });
 }

@@ -17,6 +17,15 @@ type SupabaseEnvInput = {
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
 };
 
+const appUrlSchema = z
+  .url()
+  .refine((value) => new URL(value).protocol === "https:", {
+    message: "must use HTTPS",
+  })
+  .refine((value) => new URL(value).origin === value.replace(/\/$/, ""), {
+    message: "must be an origin without a path, query, or fragment",
+  });
+
 export class SupabaseConfigurationError extends Error {
   constructor(variableNames: string[]) {
     super(
@@ -24,6 +33,29 @@ export class SupabaseConfigurationError extends Error {
     );
     this.name = "SupabaseConfigurationError";
   }
+}
+
+export class AppUrlConfigurationError extends Error {
+  constructor() {
+    super(
+      "Application URL configuration is invalid. Set APP_URL to the canonical HTTPS origin.",
+    );
+    this.name = "AppUrlConfigurationError";
+  }
+}
+
+export function getAppUrl(value: string | undefined = process.env.APP_URL) {
+  if (value === undefined || value.trim() === "") {
+    return null;
+  }
+
+  const result = appUrlSchema.safeParse(value.trim().replace(/\/$/, ""));
+
+  if (!result.success) {
+    throw new AppUrlConfigurationError();
+  }
+
+  return result.data;
 }
 
 /**

@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { LanguageSelector } from "@/components/shared/language-selector";
 import { PageHeading } from "@/components/shared/page-heading";
 import { ThemeSelector } from "@/components/shared/theme-selector";
+import type { AppLocale } from "@/i18n/routing";
+import { createClient } from "@/lib/supabase/server";
+import { mapPasskeyError } from "@/modules/auth/passkeys";
+import { requireActiveUser } from "@/modules/auth/server/access";
+import { PasskeyManager } from "@/modules/settings/components/passkey-manager";
 import { SettingsPanel } from "@/modules/settings/components/settings-panel";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -12,7 +17,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SettingsPage() {
-  const t = await getTranslations("Settings");
+  const locale = (await getLocale()) as AppLocale;
+  await requireActiveUser(locale);
+  const [t, tPasskeys] = await Promise.all([
+    getTranslations("Settings"),
+    getTranslations("Passkeys"),
+  ]);
+  const supabase = await createClient();
+  const { data: passkeys, error } = await supabase.auth.passkey.list();
 
   return (
     <div className="space-y-8">
@@ -29,6 +41,16 @@ export default async function SettingsPage() {
           description={t("languageDescription")}
         >
           <LanguageSelector />
+        </SettingsPanel>
+        <SettingsPanel
+          className="lg:col-span-2"
+          title={tPasskeys("security")}
+          description={tPasskeys("securityDescription")}
+        >
+          <PasskeyManager
+            initialPasskeys={passkeys ?? []}
+            initialError={error ? mapPasskeyError(error) : null}
+          />
         </SettingsPanel>
       </div>
     </div>

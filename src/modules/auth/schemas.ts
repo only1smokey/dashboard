@@ -8,6 +8,12 @@ export const loginSchema = z.object({
   email: z.email().trim(),
   password: z.string().min(1),
   locale: localeSchema,
+  nextPath: z.string().max(2048).nullable().optional(),
+});
+
+export const passkeySignInSchema = z.object({
+  locale: localeSchema,
+  nextPath: z.string().max(2048).nullable().optional(),
 });
 
 export const forgotPasswordSchema = z.object({

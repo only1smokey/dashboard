@@ -20,9 +20,15 @@ export default async function proxy(request: NextRequest) {
       !isPublicAuthRoute(localizedRoute.pathname) &&
       !userId
     ) {
-      return NextResponse.redirect(
-        new URL(getLoginPath(localizedRoute.locale), request.url),
+      const loginUrl = new URL(
+        getLoginPath(localizedRoute.locale),
+        request.url,
       );
+      loginUrl.searchParams.set(
+        "next",
+        `${request.nextUrl.pathname}${request.nextUrl.search}`,
+      );
+      return NextResponse.redirect(loginUrl);
     }
 
     return handleI18nRouting(request);

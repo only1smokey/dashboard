@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactCompiler: true,
+  allowedDevOrigins: ["**.*"],
 };
 
 const withNextIntl = createNextIntlPlugin();

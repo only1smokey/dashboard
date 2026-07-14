@@ -3,15 +3,16 @@ services:
     image: ${DASHBOARD_IMAGE:-ghcr.io/owner/family-dashboard:latest}
     container_name: ${DASHBOARD_CONTAINER_NAME:-family-dashboard}
     restart: unless-stopped
-    ports:
-      - "${DASHBOARD_PORT:-3000}:3000"
     env_file:
       - path: .env
         required: false
     environment:
+      APP_URL: ${APP_URL:?Set APP_URL to the canonical HTTPS origin}
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
       PORT: 3000
+    expose:
+      - "3000"
     healthcheck:
       test:
         - CMD
@@ -30,3 +31,51 @@ services:
     security_opt:
       - no-new-privileges:true
     stop_grace_period: 15s
+    networks:
+      - dashboard_private
+
+  caddy:
+    image: caddy:2.11.4-alpine
+    container_name: ${CADDY_CONTAINER_NAME:-family-dashboard-caddy}
+    restart: unless-stopped
+    depends_on:
+      dashboard:
+        condition: service_started
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN to the dashboard hostname}
+      APP_URL: ${APP_URL:?Set APP_URL to the canonical HTTPS origin}
+      CADDY_TLS_MODE: ${CADDY_TLS_MODE:?Set CADDY_TLS_MODE to internal or public}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    entrypoint:
+      - /bin/sh
+      - /etc/caddy/entrypoint.sh
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy:/etc/caddy:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - dashboard_private
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    stop_grace_period: 15s
+
+networks:
+  dashboard_private:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -49,3 +49,54 @@ export function getSafeCallbackPath(
   const resetPasswordPath = `/${locale}/reset-password`;
   return candidate === resetPasswordPath ? candidate : getLoginPath(locale);
 }
+
+export function getSafePostAuthPath(
+  locale: AppLocale,
+  candidate: string | null | undefined,
+) {
+  const fallback = `/${locale}`;
+
+  if (!candidate || !candidate.startsWith("/") || candidate.startsWith("//")) {
+    return fallback;
+  }
+
+  try {
+    const base = new URL("https://family-dashboard.invalid");
+    const target = new URL(candidate, base);
+    const localizedRoute = getLocalizedRoute(target.pathname);
+
+    if (
+      target.origin !== base.origin ||
+      !localizedRoute ||
+      localizedRoute.locale !== locale ||
+      isPublicAuthRoute(localizedRoute.pathname) ||
+      localizedRoute.pathname === "/account-disabled"
+    ) {
+      return fallback;
+    }
+
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch {
+    return fallback;
+  }
+}
+
+export function getPostAuthPathForAccess({
+  isActive,
+  locale,
+  nextPath,
+  preferredLocale,
+}: {
+  isActive: boolean;
+  locale: AppLocale;
+  nextPath?: string | null;
+  preferredLocale: AppLocale;
+}) {
+  if (!isActive) {
+    return getDisabledAccountPath(preferredLocale);
+  }
+
+  return nextPath
+    ? getSafePostAuthPath(locale, nextPath)
+    : `/${preferredLocale}`;
+}

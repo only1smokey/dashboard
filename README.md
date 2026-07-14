@@ -9,6 +9,7 @@ A production-ready foundation for a private family dashboard. The current applic
 - Tailwind CSS 4 and shadcn/ui with Radix primitives
 - Lucide icons, `next-themes`, `next-intl`, and Zod
 - Supabase JavaScript and SSR clients with cookie-based sessions
+- Experimental Supabase Passkey authentication with email/password fallback
 - pnpm, ESLint, Prettier, and `prettier-plugin-tailwindcss`
 - Standalone Next.js output in a non-root Node.js container
 
@@ -28,6 +29,8 @@ src/i18n/                       next-intl routing, navigation, and request confi
 src/modules/                    Module registry plus feature-owned UI
 src/lib/supabase/               Browser, server, and session-refresh clients
 .github/workflows/container.yml Multi-platform GHCR image publishing
+caddy/                          Production HTTPS reverse-proxy configuration
+docs/deployment.md              Caddy, Docker, TLS, and Pine64 runbook
 ```
 
 ## Local development
@@ -75,6 +78,39 @@ Secret keys and legacy `service_role` keys have elevated access and can bypass n
 
 The browser client is in `src/lib/supabase/client.ts`; the request-scoped Server Component, Server Action, and Route Handler client is in `src/lib/supabase/server.ts`. `src/lib/supabase/proxy.ts` validates and refreshes cookie-backed sessions and is composed with the locale proxy. Localized login, password recovery, logout, profile and avatar management, server route protection, active-account checks, and secure administrator operations are implemented. Follow [supabase/README.md](supabase/README.md) before attempting to sign in; the application deliberately fails closed until both migrations are applied.
 
+### Passkeys (experimental)
+
+Supabase Passkey support is currently experimental and its API may change without notice. This project uses `@supabase/supabase-js` 2.110.4 as its minimum Passkey-capable version and explicitly enables `auth.experimental.passkey`. Keep `@supabase/ssr` compatible with that client version when upgrading. Passkeys must also be enabled under Supabase **Authentication > Passkeys**; the client opt-in does not enable the server feature.
+
+The localized login page offers an intentional **Sign in with passkey** action before the email/password form. It uses Supabase's high-level discoverable-credential flow and does not require an email first. The authenticated Settings page lists the current user's Passkeys and supports registration, rename, and confirmed removal through Supabase Auth. Supabase Auth owns credential IDs, public keys, challenges, and verification; the application creates no Passkey database table and stores no credential material.
+
+Email/password authentication and password reset remain available as a fallback. A Passkey session enters the same server-side authorization path as a password session, including the mandatory active-account check and role-based route guards.
+
+The current development WebAuthn configuration in the Supabase Dashboard is:
+
+```text
+Relying Party Display Name: Family Dashboard
+Relying Party ID: localhost
+Relying Party Origins: http://localhost:3000
+```
+
+These values belong in the Supabase Dashboard and are deliberately not hard-coded in application code. WebAuthn requires HTTPS in production (loopback development origins such as `localhost` are the exception). Choose the production RP ID carefully: Passkeys are cryptographically bound to it, and changing it invalidates every previously registered Passkey. Do not enroll production Passkeys until the permanent production hostname and HTTPS origin are finalized.
+
+`http://localhost:3000` can test Passkeys only in a browser running on the development computer. A phone opening the app through a LAN address such as `http://192.168.x.x:3000` is not a secure WebAuthn context, and `localhost` on the phone refers to the phone itself. Mobile Passkey testing therefore requires a stable hostname served over HTTPS with a certificate trusted by the phone; that hostname and exact origin must match the RP configuration in Supabase. Next.js `allowedDevOrigins` does not change these WebAuthn security requirements.
+
+#### Production Passkey checklist
+
+- Finalize the permanent production hostname before enrollment.
+- Serve the dashboard over HTTPS with a valid certificate.
+- Choose the stable bare-domain RP ID without a scheme, port, or path.
+- Configure the exact HTTPS production origin in Supabase Passkey settings.
+- Confirm the origin hostname matches the RP ID or one of its subdomains.
+- Keep the Supabase Passkey provider enabled and the JavaScript experimental opt-in present.
+- Rebuild the image if public Supabase configuration changes.
+- Test registration, sign-in, rename, removal, cancellation, and inactive-account blocking on the production origin.
+- Verify email/password sign-in and password reset still work as fallback.
+- Document that changing the RP ID requires every family member to enroll new Passkeys.
+
 ### Profiles and avatars
 
 Signed-in users can open `/<locale>/profile` to view their read-only Auth email, edit their display name, store a preferred language, and upload, replace, or remove an avatar. Profile actions update only `profiles.display_name` and `profiles.preferred_locale`; they cannot change user IDs, Auth email data, roles, or active status.
@@ -121,31 +157,19 @@ Do not add client-side fetching or global state to the base shell. Future data s
 
 Do not register unfinished modules or add placeholder dashboard cards.
 
-## Docker
+## Production Docker and HTTPS
 
-Build and run locally. The public Supabase values must be passed as build arguments because Next.js embeds `NEXT_PUBLIC_` variables during `next build`:
+Production Compose runs two containers on one private Docker bridge:
 
-```bash
-docker build \
-  --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
-  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
-  -t family-dashboard:local .
-docker run --rm --name family-dashboard -p 3000:3000 family-dashboard:local
+```text
+client -> Caddy :80/:443 -> dashboard:3000
 ```
 
-On PowerShell, use `$env:NEXT_PUBLIC_SUPABASE_URL` and `$env:NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in the corresponding `--build-arg` values.
+Caddy is the only service with host-published ports. The standalone Next.js container remains non-root, is reachable by Caddy at the Compose service name `dashboard`, and is not published on host port 3000. Caddy is separate from the application image so TLS state and proxy updates remain independent of the prebuilt Next.js artifact. The normal `pnpm dev` workflow still listens directly on `http://localhost:3000` outside production Docker.
 
-Or validate the pull-oriented Compose definition with a local image override:
+The complete local, internal-CA, public-ACME, Supabase, Passkey, validation, reload, log, backup, and Pine64 procedures are in [docs/deployment.md](docs/deployment.md). Read that runbook before deploying. In particular, never casually delete the `caddy_data` volume: it contains certificates, private keys, and Caddy PKI state and is not disposable cache data.
 
-```bash
-DASHBOARD_IMAGE=family-dashboard:local docker compose up -d
-docker compose ps
-docker compose down
-```
-
-On PowerShell, set the override with `$env:DASHBOARD_IMAGE='family-dashboard:local'` before running Compose.
-
-The runtime stage contains the standalone server, static assets, and public assets only. It runs as UID/GID `1001`, listens on `0.0.0.0:3000`, and exposes `/api/health` to both Docker and Compose health checks. The health endpoint remains independent of Supabase.
+The application image remains a minimal standalone Next.js runtime. GitHub Actions builds its `linux/amd64` and `linux/arm64` variants; the Pine64 only pulls images. Public Supabase values must still be supplied as build arguments because Next.js embeds `NEXT_PUBLIC_` variables during `next build`.
 
 ## GitHub Container Registry
 
@@ -160,10 +184,14 @@ In the GitHub repository, open **Settings > Secrets and variables > Actions**, s
 
 Supplying these values only through `compose.yaml` after the image is built is too late for browser code. Next.js freezes `NEXT_PUBLIC_` values into the client bundle at build time, so any change to the project URL or publishable key requires a new Docker image build and deployment.
 
-Set the deployment image on the Pine64 in a `.env` file beside `compose.yaml`:
+Set the deployment image, hostname, canonical URL, and TLS mode on the Pine64 in a `.env` file beside `compose.yaml`. This internal-CA example requires client trust setup described in the deployment runbook:
 
 ```env
 DASHBOARD_IMAGE=ghcr.io/OWNER/REPOSITORY:latest
+APP_DOMAIN=dashboard.example.local
+APP_URL=https://dashboard.example.local
+CADDY_TLS_MODE=internal
+ACME_EMAIL=
 ```
 
 For a private repository or package, create a GitHub personal access token with `read:packages`, then authenticate once on the Pine64 without placing the token in Compose:
@@ -178,7 +206,7 @@ The package must grant the account access. Docker stores the login in the deploy
 
 ### Pine64 deployment and updates
 
-Copy `compose.yaml` and the deployment `.env` to the board once. Every deployment or update is then exactly:
+Copy `compose.yaml`, `caddy/`, and the deployment `.env` to the board once. Every deployment or update is then exactly:
 
 ```bash
 docker compose pull
@@ -189,4 +217,4 @@ The Pine64 never runs `pnpm install`, `pnpm build`, or `next build`. Compilation
 
 ## Scope
 
-Authentication, profile and private-avatar management, role storage, active-account enforcement, and basic user administration are present. Public registration, invitations, Auth user creation/deletion, Auth Admin APIs, and unrelated family dashboard modules remain deliberately out of scope.
+Authentication (including experimental Passkeys), profile and private-avatar management, role storage, active-account enforcement, and basic user administration are present. Public registration, invitations, Auth user creation/deletion, Auth Admin APIs, and unrelated family dashboard modules remain deliberately out of scope.

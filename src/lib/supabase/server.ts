@@ -11,6 +11,9 @@ export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(url, publishableKey, {
+    auth: {
+      experimental: { passkey: true },
+    },
     cookies: {
       getAll() {
         return cookieStore.getAll();

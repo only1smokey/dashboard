@@ -3,13 +3,15 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { getAppUrl } from "@/config/env";
 import { createClient } from "@/lib/supabase/server";
 import { hasActiveRole } from "@/modules/auth/authorization";
-import { getDisabledAccountPath, getLoginPath } from "@/modules/auth/routing";
+import { getLoginPath, getPostAuthPathForAccess } from "@/modules/auth/routing";
 import {
   forgotPasswordSchema,
   localeSchema,
   loginSchema,
+  passkeySignInSchema,
   resetPasswordSchema,
 } from "@/modules/auth/schemas";
 
@@ -21,7 +23,8 @@ export type AuthActionError =
   | "passwordUpdateFailed";
 
 export type AuthActionResult =
-  { status: "success" } | { status: "error"; error: AuthActionError };
+  | { status: "success"; redirectTo?: string }
+  | { status: "error"; error: AuthActionError };
 
 function getValidOrigin(value: string | null) {
   if (!value) {
@@ -38,7 +41,60 @@ function getValidOrigin(value: string | null) {
   }
 }
 
+async function completeAuthenticatedSignIn({
+  locale,
+  nextPath,
+  supabase,
+  userId,
+}: {
+  locale: "de" | "en" | "bg";
+  nextPath?: string | null;
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  userId: string;
+}): Promise<AuthActionResult> {
+  const [
+    { data: authorization, error: authorizationError },
+    { data: profile },
+  ] = await Promise.all([
+    supabase
+      .from("user_roles")
+      .select("role, is_active")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("preferred_locale")
+      .eq("id", userId)
+      .maybeSingle(),
+  ]);
+
+  if (authorizationError || !authorization) {
+    await supabase.auth.signOut();
+    return { status: "error", error: "authenticationFailed" };
+  }
+
+  const preferredLocale = profile?.preferred_locale ?? locale;
+  return {
+    status: "success",
+    redirectTo: getPostAuthPathForAccess({
+      isActive: hasActiveRole({
+        role: authorization.role,
+        isActive: authorization.is_active,
+      }),
+      locale,
+      nextPath,
+      preferredLocale,
+    }),
+  };
+}
+
 async function getRequestOrigin() {
+  const configuredAppUrl = getAppUrl();
+
+  if (configuredAppUrl) {
+    return configuredAppUrl;
+  }
+
   const requestHeaders = await headers();
   const origin = getValidOrigin(requestHeaders.get("origin"));
 
@@ -46,10 +102,8 @@ async function getRequestOrigin() {
     return origin;
   }
 
-  const forwardedHost = requestHeaders.get("x-forwarded-host");
-  const host = forwardedHost ?? requestHeaders.get("host");
-  const forwardedProtocol = requestHeaders.get("x-forwarded-proto");
-  const protocol = forwardedProtocol === "http" ? "http" : "https";
+  const host = requestHeaders.get("host");
+  const protocol = host?.startsWith("localhost:") ? "http" : "https";
 
   return getValidOrigin(host ? `${protocol}://${host}` : null);
 }
@@ -61,7 +115,7 @@ export async function loginAction(input: unknown): Promise<AuthActionResult> {
     return { status: "error", error: "invalidFields" };
   }
 
-  const { email, password, locale } = parsed.data;
+  const { email, password, locale, nextPath } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -72,37 +126,36 @@ export async function loginAction(input: unknown): Promise<AuthActionResult> {
     return { status: "error", error: "authenticationFailed" };
   }
 
-  const [
-    { data: authorization, error: authorizationError },
-    { data: profile },
-  ] = await Promise.all([
-    supabase
-      .from("user_roles")
-      .select("role, is_active")
-      .eq("user_id", data.user.id)
-      .maybeSingle(),
-    supabase
-      .from("profiles")
-      .select("preferred_locale")
-      .eq("id", data.user.id)
-      .maybeSingle(),
-  ]);
+  return completeAuthenticatedSignIn({
+    locale,
+    nextPath,
+    supabase,
+    userId: data.user.id,
+  });
+}
 
-  if (authorizationError || !authorization) {
-    await supabase.auth.signOut();
+export async function completePasskeySignInAction(
+  input: unknown,
+): Promise<AuthActionResult> {
+  const parsed = passkeySignInSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { status: "error", error: "invalidFields" };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data.user) {
     return { status: "error", error: "authenticationFailed" };
   }
 
-  if (
-    !hasActiveRole({
-      role: authorization.role,
-      isActive: authorization.is_active,
-    })
-  ) {
-    redirect(getDisabledAccountPath(profile?.preferred_locale ?? locale));
-  }
-
-  redirect(`/${profile?.preferred_locale ?? locale}`);
+  return completeAuthenticatedSignIn({
+    locale: parsed.data.locale,
+    nextPath: parsed.data.nextPath,
+    supabase,
+    userId: data.user.id,
+  });
 }
 
 export async function requestPasswordResetAction(

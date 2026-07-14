@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getSupabaseConfig, SupabaseConfigurationError } from "./env.ts";
+import {
+  AppUrlConfigurationError,
+  getAppUrl,
+  getSupabaseConfig,
+  SupabaseConfigurationError,
+} from "./env.ts";
 
 const validConfig = {
   NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
@@ -35,5 +40,21 @@ test("rejects non-HTTPS URLs and non-publishable keys", () => {
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "not-a-publishable-key",
       }),
     SupabaseConfigurationError,
+  );
+});
+
+test("validates the canonical application HTTPS origin", () => {
+  assert.equal(
+    getAppUrl("https://dashboard.example.local/"),
+    "https://dashboard.example.local",
+  );
+  assert.equal(getAppUrl(""), null);
+  assert.throws(
+    () => getAppUrl("http://dashboard.example.local"),
+    AppUrlConfigurationError,
+  );
+  assert.throws(
+    () => getAppUrl("https://dashboard.example.local/path"),
+    AppUrlConfigurationError,
   );
 });

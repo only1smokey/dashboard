@@ -4,10 +4,18 @@ import test from "node:test";
 import {
   forgotPasswordSchema,
   loginSchema,
+  passkeySignInSchema,
   resetPasswordSchema,
 } from "./schemas.ts";
 
 test("accepts valid localized login and reset inputs", () => {
+  assert.equal(
+    passkeySignInSchema.safeParse({
+      locale: "en",
+      nextPath: "/en/settings",
+    }).success,
+    true,
+  );
   assert.equal(
     loginSchema.safeParse({
       email: "family@example.com",

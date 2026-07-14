@@ -63,18 +63,28 @@ In the matching Supabase project:
 1. Under **Authentication > Providers > Email**, keep email/password enabled
    and disable public user sign-ups. Accounts are created manually in the
    dashboard.
-2. Under **Authentication > URL Configuration**, set **Site URL** to the
-   deployed dashboard origin, such as `https://dashboard.example.com`.
+2. Under **Authentication > URL Configuration**, set **Site URL** to the exact
+   `APP_URL` origin, such as `https://dashboard.example.com`.
 3. Add these redirect URLs for local development:
    `http://localhost:3000/de/auth/callback`,
    `http://localhost:3000/en/auth/callback`, and
    `http://localhost:3000/bg/auth/callback`.
-4. Add the same three callback paths for the production origin. Add preview or
-   staging origins only when those deployments are intentionally trusted.
-5. Set the Auth password minimum to at least 8 characters so it matches the
+4. Add these exact production redirect URLs, replacing the origin with the
+   current `APP_URL`: `${APP_URL}/de/auth/callback`,
+   `${APP_URL}/en/auth/callback`, and `${APP_URL}/bg/auth/callback`. Add preview
+   or staging origins only when those deployments are intentionally trusted.
+5. Under **Authentication > Passkeys**, set the Relying Party ID to the exact
+   `APP_DOMAIN` (no scheme, port, or path) and the allowed Relying Party Origin
+   to the exact `APP_URL`. Changing the RP ID makes Passkeys registered for the
+   previous RP ID unusable.
+6. Set the Auth password minimum to at least 8 characters so it matches the
    reset form validation.
-6. Configure production SMTP before relying on password-reset delivery. Keep
+7. Configure production SMTP before relying on password-reset delivery. Keep
    the reset-password email template's confirmation URL link intact.
+
+Changing `.env` or recreating Docker containers cannot modify hosted Supabase
+Dashboard settings. Repeat the Site URL, redirect URL, and Passkey changes
+manually whenever `APP_DOMAIN` or `APP_URL` changes.
 
 ## Security model
 

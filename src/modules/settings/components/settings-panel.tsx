@@ -7,18 +7,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export function SettingsPanel({
   title,
   description,
   children,
+  className,
 }: {
   title: string;
   description: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <Card className="shadow-xs">
+    <Card className={cn("shadow-xs", className)}>
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
         <CardDescription className="leading-6">{description}</CardDescription>

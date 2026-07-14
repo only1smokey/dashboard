@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { getAppUrl } from "@/config/env";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -9,24 +10,7 @@ import {
 } from "@/modules/auth/routing";
 
 function getPublicOrigin(request: NextRequest) {
-  const forwardedHost = request.headers
-    .get("x-forwarded-host")
-    ?.split(",")[0]
-    ?.trim();
-  const host = forwardedHost ?? request.headers.get("host");
-  const forwardedProtocol = request.headers
-    .get("x-forwarded-proto")
-    ?.split(",")[0]
-    ?.trim();
-  const protocol = forwardedProtocol ?? request.nextUrl.protocol.slice(0, -1);
-
-  try {
-    return host && (protocol === "http" || protocol === "https")
-      ? new URL(`${protocol}://${host}`).origin
-      : request.nextUrl.origin;
-  } catch {
-    return request.nextUrl.origin;
-  }
+  return getAppUrl() ?? request.nextUrl.origin;
 }
 
 export async function GET(
