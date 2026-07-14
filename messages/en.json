@@ -9,6 +9,8 @@
     "toggleNavigation": "Toggle navigation",
     "skipContent": "Skip to content",
     "accountUnavailable": "Account not connected yet",
+    "account": "Account",
+    "logout": "Log out",
     "backHome": "Back to home"
   },
   "Navigation": {
@@ -42,6 +44,37 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "Auth": {
+    "loginTitle": "Welcome back",
+    "loginDescription": "Sign in with your family account to open the private dashboard.",
+    "emailLabel": "Email address",
+    "passwordLabel": "Password",
+    "emailInvalid": "Enter a valid email address.",
+    "passwordRequired": "Enter your password.",
+    "forgotPasswordLink": "Forgot password?",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "forgotPasswordTitle": "Reset your password",
+    "forgotPasswordDescription": "Enter your email address and we’ll send reset instructions if an account matches it.",
+    "sendResetLink": "Send reset link",
+    "sendingResetLink": "Sending…",
+    "backToLogin": "Back to sign in",
+    "resetRequestSent": "If an account matches that address, a password reset email is on its way.",
+    "resetPasswordTitle": "Choose a new password",
+    "resetPasswordDescription": "Use at least eight characters and keep this password private.",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "passwordRequirements": "Use at least eight characters.",
+    "passwordMismatch": "The passwords do not match.",
+    "updatePassword": "Update password",
+    "updatingPassword": "Updating…",
+    "invalidFields": "Check the highlighted fields and try again.",
+    "authenticationFailed": "Sign-in failed. Check your credentials and try again.",
+    "requestFailed": "The request could not be completed. Please try again.",
+    "invalidResetLink": "This password reset link is invalid or has expired. Request a new one.",
+    "passwordUpdateFailed": "The password could not be updated. Request a new reset link and try again.",
+    "passwordUpdated": "Your password was updated. You can now sign in."
   },
   "Loading": {
     "label": "Loading content"

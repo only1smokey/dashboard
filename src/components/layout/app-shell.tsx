@@ -2,8 +2,18 @@ import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/routing";
+import type { CurrentUserAccess } from "@/modules/auth/server/access";
 
-export async function AppShell({ children }: { children: React.ReactNode }) {
+export async function AppShell({
+  children,
+  locale,
+  user,
+}: {
+  children: React.ReactNode;
+  locale: AppLocale;
+  user: CurrentUserAccess;
+}) {
   const t = await getTranslations("Common");
 
   return (
@@ -14,9 +24,11 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       >
         {t("skipContent")}
       </a>
-      <AppSidebar />
+      <AppSidebar
+        accountLabel={user.displayName ?? user.email ?? t("account")}
+      />
       <SidebarInset id="main-content" className="min-w-0">
-        <AppHeader />
+        <AppHeader locale={locale} />
         <div className="w-full flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
           <div className="mx-auto w-full max-w-6xl">{children}</div>
         </div>

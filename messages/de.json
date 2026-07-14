@@ -9,6 +9,8 @@
     "toggleNavigation": "Navigation ein- oder ausblenden",
     "skipContent": "Zum Inhalt springen",
     "accountUnavailable": "Konto noch nicht verbunden",
+    "account": "Konto",
+    "logout": "Abmelden",
     "backHome": "Zur Startseite"
   },
   "Navigation": {
@@ -42,6 +44,37 @@
     "light": "Hell",
     "dark": "Dunkel",
     "system": "System"
+  },
+  "Auth": {
+    "loginTitle": "Willkommen zurück",
+    "loginDescription": "Melde dich mit deinem Familienkonto an, um die private Übersicht zu öffnen.",
+    "emailLabel": "E-Mail-Adresse",
+    "passwordLabel": "Passwort",
+    "emailInvalid": "Gib eine gültige E-Mail-Adresse ein.",
+    "passwordRequired": "Gib dein Passwort ein.",
+    "forgotPasswordLink": "Passwort vergessen?",
+    "signIn": "Anmelden",
+    "signingIn": "Anmeldung läuft…",
+    "forgotPasswordTitle": "Passwort zurücksetzen",
+    "forgotPasswordDescription": "Gib deine E-Mail-Adresse ein. Wenn ein passendes Konto existiert, senden wir dir weitere Anweisungen.",
+    "sendResetLink": "Link zum Zurücksetzen senden",
+    "sendingResetLink": "Wird gesendet…",
+    "backToLogin": "Zurück zur Anmeldung",
+    "resetRequestSent": "Wenn ein Konto zu dieser Adresse passt, ist eine E-Mail zum Zurücksetzen unterwegs.",
+    "resetPasswordTitle": "Neues Passwort wählen",
+    "resetPasswordDescription": "Verwende mindestens acht Zeichen und halte dieses Passwort geheim.",
+    "newPasswordLabel": "Neues Passwort",
+    "confirmPasswordLabel": "Neues Passwort bestätigen",
+    "passwordRequirements": "Verwende mindestens acht Zeichen.",
+    "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+    "updatePassword": "Passwort aktualisieren",
+    "updatingPassword": "Wird aktualisiert…",
+    "invalidFields": "Prüfe die markierten Felder und versuche es erneut.",
+    "authenticationFailed": "Die Anmeldung ist fehlgeschlagen. Prüfe deine Zugangsdaten und versuche es erneut.",
+    "requestFailed": "Die Anfrage konnte nicht abgeschlossen werden. Bitte versuche es erneut.",
+    "invalidResetLink": "Dieser Link ist ungültig oder abgelaufen. Fordere einen neuen Link an.",
+    "passwordUpdateFailed": "Das Passwort konnte nicht aktualisiert werden. Fordere einen neuen Link an und versuche es erneut.",
+    "passwordUpdated": "Dein Passwort wurde aktualisiert. Du kannst dich jetzt anmelden."
   },
   "Loading": {
     "label": "Inhalt wird geladen"

@@ -9,6 +9,8 @@
     "toggleNavigation": "Показване или скриване на навигацията",
     "skipContent": "Към съдържанието",
     "accountUnavailable": "Профилът още не е свързан",
+    "account": "Профил",
+    "logout": "Изход",
     "backHome": "Към началната страница"
   },
   "Navigation": {
@@ -42,6 +44,37 @@
     "light": "Светла",
     "dark": "Тъмна",
     "system": "Системна"
+  },
+  "Auth": {
+    "loginTitle": "Добре дошли отново",
+    "loginDescription": "Влезте със семейния си профил, за да отворите личното табло.",
+    "emailLabel": "Имейл адрес",
+    "passwordLabel": "Парола",
+    "emailInvalid": "Въведете валиден имейл адрес.",
+    "passwordRequired": "Въведете паролата си.",
+    "forgotPasswordLink": "Забравена парола?",
+    "signIn": "Вход",
+    "signingIn": "Влизане…",
+    "forgotPasswordTitle": "Нулиране на паролата",
+    "forgotPasswordDescription": "Въведете имейл адреса си. Ако има съответстващ профил, ще изпратим инструкции.",
+    "sendResetLink": "Изпращане на връзка",
+    "sendingResetLink": "Изпращане…",
+    "backToLogin": "Назад към входа",
+    "resetRequestSent": "Ако има профил с този адрес, имейлът за нулиране е изпратен.",
+    "resetPasswordTitle": "Изберете нова парола",
+    "resetPasswordDescription": "Използвайте поне осем знака и пазете паролата си в тайна.",
+    "newPasswordLabel": "Нова парола",
+    "confirmPasswordLabel": "Потвърдете новата парола",
+    "passwordRequirements": "Използвайте поне осем знака.",
+    "passwordMismatch": "Паролите не съвпадат.",
+    "updatePassword": "Обновяване на паролата",
+    "updatingPassword": "Обновяване…",
+    "invalidFields": "Проверете отбелязаните полета и опитайте отново.",
+    "authenticationFailed": "Входът е неуспешен. Проверете данните си и опитайте отново.",
+    "requestFailed": "Заявката не можа да бъде завършена. Опитайте отново.",
+    "invalidResetLink": "Тази връзка е невалидна или изтекла. Поискайте нова.",
+    "passwordUpdateFailed": "Паролата не можа да бъде обновена. Поискайте нова връзка и опитайте пак.",
+    "passwordUpdated": "Паролата ви е обновена. Вече можете да влезете."
   },
   "Loading": {
     "label": "Съдържанието се зарежда"

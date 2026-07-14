@@ -1,11 +1,14 @@
-import { UserRound } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { ThemeSelector } from "@/components/shared/theme-selector";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import type { AppLocale } from "@/i18n/routing";
+import { logoutAction } from "@/modules/auth/server/actions";
 
-export async function AppHeader() {
+export async function AppHeader({ locale }: { locale: AppLocale }) {
   const t = await getTranslations("Common");
 
   return (
@@ -22,13 +25,18 @@ export async function AppHeader() {
       </div>
       <div className="flex items-center gap-2">
         <ThemeSelector />
-        <div
-          className="text-muted-foreground flex size-11 items-center justify-center rounded-md border md:size-9"
-          aria-label={t("accountUnavailable")}
-          title={t("accountUnavailable")}
-        >
-          <UserRound className="size-4" aria-hidden="true" />
-        </div>
+        <form action={logoutAction.bind(null, locale)}>
+          <Button
+            type="submit"
+            variant="outline"
+            size="icon"
+            className="size-11 md:size-9"
+            aria-label={t("logout")}
+            title={t("logout")}
+          >
+            <LogOut aria-hidden="true" />
+          </Button>
+        </form>
       </div>
     </header>
   );

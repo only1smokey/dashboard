@@ -1,6 +1,6 @@
 # Family Dashboard
 
-A production-ready foundation for a private family dashboard. The current application intentionally contains no household features or fake data: it provides the responsive shell, design system, internationalization, module boundary, development tooling, health endpoint, Supabase client foundation, and a pull-only ARM64/AMD64 deployment path.
+A production-ready foundation for a private family dashboard. The current application intentionally contains no household features or fake data: it provides the responsive shell, design system, internationalization, module boundary, authentication and authorization foundation, development tooling, health endpoint, and a pull-only ARM64/AMD64 deployment path.
 
 ## Technology
 
@@ -73,7 +73,7 @@ The publishable key is intentionally safe to include in browser code: it identif
 
 Secret keys and legacy `service_role` keys have elevated access and can bypass normal data protections. Never put one in a `NEXT_PUBLIC_` variable, browser bundle, Docker build argument, Compose file, source file, log, or repository setting used here. This application does not need an elevated key for its current scope.
 
-The browser client is in `src/lib/supabase/client.ts`; the request-scoped Server Component, Server Action, and Route Handler client is in `src/lib/supabase/server.ts`. `src/lib/supabase/proxy.ts` refreshes cookie-backed sessions and is composed with the existing locale proxy. Authentication screens and authorization checks are intentionally deferred. When authentication is implemented, configure the production site and callback redirect URLs in the Supabase dashboard.
+The browser client is in `src/lib/supabase/client.ts`; the request-scoped Server Component, Server Action, and Route Handler client is in `src/lib/supabase/server.ts`. `src/lib/supabase/proxy.ts` validates and refreshes cookie-backed sessions and is composed with the locale proxy. Localized login, password recovery, logout, server route protection, active-role checks, and secure profile/role migrations are implemented. Follow [supabase/README.md](supabase/README.md) before attempting to sign in; the application deliberately fails closed until its migration is applied.
 
 ### Verify client initialization
 
@@ -173,4 +173,4 @@ The Pine64 never runs `pnpm install`, `pnpm build`, or `next build`. Compilation
 
 ## Scope
 
-Supabase client initialization and cookie/session refresh plumbing are present. Database tables, migrations, login and registration UI, profiles, roles, invitations, administrative operations, and family modules remain deliberately deferred.
+Authentication, profile storage, role storage, and authorization guards are present. Public registration, invitations, avatar management, administrative operations, and family dashboard modules remain deliberately deferred.

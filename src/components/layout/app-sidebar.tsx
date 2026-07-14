@@ -20,7 +20,7 @@ import {
 import { Link, usePathname } from "@/i18n/navigation";
 import { navigationModules } from "@/modules/registry";
 
-export function AppSidebar() {
+export function AppSidebar({ accountLabel }: { accountLabel: string }) {
   const pathname = usePathname();
   const tCommon = useTranslations("Common");
   const tNavigation = useTranslations("Navigation");
@@ -79,11 +79,11 @@ export function AppSidebar() {
       <SidebarFooter className="border-sidebar-border border-t p-3">
         <div
           className="text-muted-foreground flex min-h-11 items-center gap-3 px-1.5 text-sm group-data-[collapsible=icon]:justify-center"
-          aria-label={tCommon("accountUnavailable")}
+          aria-label={accountLabel}
         >
           <UserRound className="size-5 shrink-0" aria-hidden="true" />
           <span className="truncate group-data-[collapsible=icon]:hidden">
-            {tCommon("accountUnavailable")}
+            {accountLabel}
           </span>
         </div>
       </SidebarFooter>

@@ -1,20 +1,30 @@
 import "server-only";
 
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseConfig } from "@/config/env";
+import type { Database } from "@/lib/supabase/database.types";
 
-type ResponseFactory = () => NextResponse;
+interface VerifiedAuth {
+  userId: string | null;
+}
+
+type ResponseFactory = (auth: VerifiedAuth) => NextResponse;
 
 export async function updateSession(
   request: NextRequest,
   createResponse: ResponseFactory = () => NextResponse.next({ request }),
 ) {
-  let supabaseResponse = createResponse();
   const { url, publishableKey } = getSupabaseConfig();
+  let cookiesToApply: Array<{
+    name: string;
+    value: string;
+    options: CookieOptions;
+  }> = [];
+  let headersToApply: Record<string, string> = {};
 
-  const supabase = createServerClient(url, publishableKey, {
+  const supabase = createServerClient<Database>(url, publishableKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -24,21 +34,22 @@ export async function updateSession(
           request.cookies.set(name, value);
         });
 
-        supabaseResponse = createResponse();
-
-        cookiesToSet.forEach(({ name, value, options }) => {
-          supabaseResponse.cookies.set(name, value, options);
-        });
-        Object.entries(headers).forEach(([name, value]) => {
-          supabaseResponse.headers.set(name, value);
-        });
+        cookiesToApply = cookiesToSet;
+        headersToApply = headers;
       },
     },
   });
 
-  // Validates a cookie-backed session and refreshes it when necessary.
-  // Authorization must still be enforced at each protected operation.
-  await supabase.auth.getClaims();
+  const { data, error } = await supabase.auth.getClaims();
+  const userId = error ? null : (data?.claims.sub ?? null);
+  const supabaseResponse = createResponse({ userId });
+
+  cookiesToApply.forEach(({ name, value, options }) => {
+    supabaseResponse.cookies.set(name, value, options);
+  });
+  Object.entries(headersToApply).forEach(([name, value]) => {
+    supabaseResponse.headers.set(name, value);
+  });
 
   return supabaseResponse;
 }
