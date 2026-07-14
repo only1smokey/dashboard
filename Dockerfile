@@ -28,7 +28,9 @@ ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
-RUN pnpm build
+# Git does not preserve an empty public directory, but the runtime stage always
+# copies it so future static assets can be added without changing the image.
+RUN mkdir -p public && pnpm build
 
 FROM node:24-bookworm-slim AS runner
 WORKDIR /app
