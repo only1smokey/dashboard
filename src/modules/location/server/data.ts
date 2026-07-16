@@ -90,3 +90,24 @@ export function getViewingRegion(
       }
     : null;
 }
+
+export function getViewingLocationLabel(
+  locations: readonly StoredLocation[],
+): string | null {
+  const viewingLocation = locations.find(
+    (location) => location.kind === "viewing",
+  );
+  if (!viewingLocation) return null;
+
+  const address = viewingLocation.address;
+  const locality =
+    address?.city ??
+    address?.locality ??
+    address?.district ??
+    address?.county ??
+    null;
+
+  return locality
+    ? `${locality}, ${viewingLocation.country.countryName}`
+    : viewingLocation.country.countryName;
+}

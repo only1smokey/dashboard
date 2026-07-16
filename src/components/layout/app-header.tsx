@@ -7,8 +7,15 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { AppLocale } from "@/i18n/routing";
 import { logoutAction } from "@/modules/auth/server/actions";
+import { MobilePeopleTrigger } from "@/modules/presence/components/people-interface";
 
-export async function AppHeader({ locale }: { locale: AppLocale }) {
+export async function AppHeader({
+  currentUserId,
+  locale,
+}: {
+  currentUserId: string;
+  locale: AppLocale;
+}) {
   const t = await getTranslations("Common");
 
   return (
@@ -24,6 +31,7 @@ export async function AppHeader({ locale }: { locale: AppLocale }) {
         </span>
       </div>
       <div className="flex items-center gap-2">
+        <MobilePeopleTrigger currentUserId={currentUserId} />
         <ThemeSelector />
         <form action={logoutAction.bind(null, locale)}>
           <Button

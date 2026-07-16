@@ -221,6 +221,7 @@ export async function logoutAction(localeInput: string) {
   const locale = parsedLocale.success ? parsedLocale.data : "de";
   const supabase = await createClient();
 
+  await supabase.rpc("touch_own_presence_last_seen");
   await supabase.auth.signOut();
   redirect(getLoginPath(locale));
 }

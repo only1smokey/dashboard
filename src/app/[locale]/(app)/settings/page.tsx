@@ -13,6 +13,7 @@ import { LocationSettingsForm } from "@/modules/location/components/location-set
 import { getUserLocations } from "@/modules/location/server/data";
 import { PasskeyManager } from "@/modules/settings/components/passkey-manager";
 import { SettingsPanel } from "@/modules/settings/components/settings-panel";
+import { PresenceSettingsForm } from "@/modules/presence/components/presence-settings-form";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Settings");
@@ -23,15 +24,15 @@ export default async function SettingsPage() {
   const locale = (await getLocale()) as AppLocale;
   const user = await requireActiveUser(locale);
   const supabase = await createClient();
-  const [t, tLocation, tPasskeys, locations, passkeyResult] = await Promise.all(
-    [
+  const [t, tLocation, tPasskeys, tPresence, locations, passkeyResult] =
+    await Promise.all([
       getTranslations("Settings"),
       getTranslations("Location"),
       getTranslations("Passkeys"),
+      getTranslations("Presence"),
       getUserLocations(user.userId),
       supabase.auth.passkey.list(),
-    ],
-  );
+    ]);
   const homeLocation =
     locations.find((location) => location.kind === "home") ?? null;
   const viewingLocation =
@@ -50,6 +51,9 @@ export default async function SettingsPage() {
         </SettingsPanel>
         <SettingsPanel value="language" title={t("languageTitle")}>
           <LanguageSelector />
+        </SettingsPanel>
+        <SettingsPanel value="presence" title={tPresence("preferencesTitle")}>
+          <PresenceSettingsForm />
         </SettingsPanel>
         <SettingsPanel
           value="location"

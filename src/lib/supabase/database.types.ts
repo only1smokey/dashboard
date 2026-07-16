@@ -33,6 +33,44 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_presence: {
+        Row: {
+          created_at: string;
+          last_seen_at: string | null;
+          show_current_section: boolean;
+          show_detailed_activity: boolean;
+          show_media_titles: boolean;
+          show_online: boolean;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          last_seen_at?: string | null;
+          show_current_section?: boolean;
+          show_detailed_activity?: boolean;
+          show_media_titles?: boolean;
+          show_online?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          last_seen_at?: string | null;
+          show_current_section?: boolean;
+          show_detailed_activity?: boolean;
+          show_media_titles?: boolean;
+          show_online?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_presence_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_locations: {
         Row: {
           address_city: string | null;
@@ -152,9 +190,31 @@ export type Database = {
         Args: { p_role: "user" | "admin"; p_target_user_id: string };
         Returns: undefined;
       };
+      get_people_directory: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          avatar_path: string | null;
+          display_name: string | null;
+          last_seen_at: string | null;
+          user_id: string;
+        }[];
+      };
       set_own_avatar_path: {
         Args: { p_avatar_path: string | null };
         Returns: string | null;
+      };
+      touch_own_presence_last_seen: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      update_own_presence_preferences: {
+        Args: {
+          p_show_current_section: boolean;
+          p_show_detailed_activity: boolean;
+          p_show_media_titles: boolean;
+          p_show_online: boolean;
+        };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;

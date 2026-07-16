@@ -10,6 +10,7 @@ project used by `.env.local`:
 3. `migrations/20260716120000_user_locations.sql`
 4. `migrations/20260716160000_photon_user_locations.sql`
 5. `migrations/20260716190000_user_locations_delete_access.sql`
+6. `migrations/20260716220000_realtime_presence.sql`
 
 ## Apply the migration
 
@@ -27,9 +28,12 @@ so it was not applied automatically.
    Photon migration replaces the earlier Open-Meteo table and clears any
    incompatible saved locations. Do not run isolated fragments or reverse the
    order.
-6. Confirm that `public.profiles`, `public.user_roles`, and
-   `public.user_locations` exist with RLS enabled, and that **Storage > Buckets**
-   shows a private `avatars` bucket.
+6. Run the complete Realtime Presence migration in a new query. It creates the
+   persistent Presence table/RPCs and all four `realtime.messages` policies in
+   one script; do not add application tables to the Realtime publication.
+7. Confirm that `public.profiles`, `public.user_roles`,
+   `public.user_locations`, and `public.user_presence` exist with RLS enabled,
+   and that **Storage > Buckets** shows a private `avatars` bucket.
 
 ### Supabase CLI
 
@@ -81,13 +85,16 @@ In the matching Supabase project:
    current `APP_URL`: `${APP_URL}/de/auth/callback`,
    `${APP_URL}/en/auth/callback`, and `${APP_URL}/bg/auth/callback`. Add preview
    or staging origins only when those deployments are intentionally trusted.
-5. Under **Authentication > Passkeys**, set the Relying Party ID to the exact
+5. Under **Realtime > Settings**, disable public channel access. The Presence
+   migration authorizes only the private `presence:dashboard` and
+   `presence:admin-status` topics through `realtime.messages` RLS policies.
+6. Under **Authentication > Passkeys**, set the Relying Party ID to the exact
    `APP_DOMAIN` (no scheme, port, or path) and the allowed Relying Party Origin
    to the exact `APP_URL`. Changing the RP ID makes Passkeys registered for the
    previous RP ID unusable.
-6. Set the Auth password minimum to at least 8 characters so it matches the
+7. Set the Auth password minimum to at least 8 characters so it matches the
    reset form validation.
-7. Configure production SMTP before relying on password-reset delivery. Keep
+8. Configure production SMTP before relying on password-reset delivery. Keep
    the reset-password email template's confirmation URL link intact.
 
 Changing `.env` or recreating Docker containers cannot modify hosted Supabase
@@ -106,6 +113,18 @@ manually whenever `APP_DOMAIN` or `APP_URL` changes.
   separately for home and viewing. Active users can read, insert, update, and
   delete only their own rows; other household members and anonymous requests
   cannot read this location data.
+- `user_presence` stores only low-frequency last seen information and the four
+  owner-controlled Presence privacy preferences. Authenticated clients receive
+  no direct write grant; no-argument or preference-only RPCs derive the target
+  account from `auth.uid()` and require active membership.
+- `public.get_people_directory()` is a narrow security-definer directory RPC.
+  It accepts no user ID, returns only active profiles with display name and
+  avatar path, and suppresses last seen when online visibility is disabled.
+- Private Realtime Authorization policies allow active accounts to publish and
+  receive Presence on `presence:dashboard`. All active accounts may publish
+  minimal status on `presence:admin-status`, but only active administrators may
+  receive that topic. Both policy sets are restricted to the Presence extension
+  and private channels; no application table is added to `supabase_realtime`.
 - Anonymous database requests receive no table privileges or policies.
 - `private.is_admin()` has an empty search path, accepts no user ID, derives the
   caller from `auth.uid()`, and avoids recursive role policies.

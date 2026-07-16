@@ -7,6 +7,7 @@ import {
   getUserLocations,
   getViewingRegion,
 } from "@/modules/location/server/data";
+import { getPresenceBootstrap } from "@/modules/presence/server/data";
 
 export default async function DashboardLayout({
   children,
@@ -20,11 +21,15 @@ export default async function DashboardLayout({
     ? localeCandidate
     : routing.defaultLocale;
   const user = await requireActiveUser(locale);
-  const locations = await getUserLocations(user.userId);
+  const [locations, presenceBootstrap] = await Promise.all([
+    getUserLocations(user.userId),
+    getPresenceBootstrap(user, locale),
+  ]);
 
   return (
     <AppShell
       locale={locale}
+      presenceBootstrap={presenceBootstrap}
       user={user}
       viewingRegion={getViewingRegion(locations)}
     >

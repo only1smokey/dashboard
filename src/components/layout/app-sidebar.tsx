@@ -20,17 +20,20 @@ import {
 import { Link, usePathname } from "@/i18n/navigation";
 import { navigationModules, type ModuleId } from "@/modules/registry";
 import { MemberAvatar } from "@/components/shared/member-avatar";
+import { DesktopPeopleTrigger } from "@/modules/presence/components/people-interface";
 
 export function AppSidebar({
   accountLabel,
   avatarUrl,
   availableModuleIds,
+  currentUserId,
   displayName,
   isAdmin,
 }: {
   accountLabel: string;
   avatarUrl: string | null;
   availableModuleIds: readonly ModuleId[];
+  currentUserId: string;
   displayName: string | null;
   isAdmin: boolean;
 }) {
@@ -91,6 +94,7 @@ export function AppSidebar({
                     </SidebarMenuItem>
                   );
                 })}
+              <DesktopPeopleTrigger currentUserId={currentUserId} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
