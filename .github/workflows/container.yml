@@ -17,6 +17,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: env
 
     steps:
       - name: Check out repository
@@ -27,29 +28,32 @@ jobs:
         shell: bash
         run: |
           image="ghcr.io/${GITHUB_REPOSITORY,,}"
+
           {
             echo "image=${image}"
             echo "tags<<EOF"
             echo "${image}:${GITHUB_SHA}"
+
             if [[ "${GITHUB_REF}" == "refs/heads/master" ]]; then
               echo "${image}:latest"
             fi
+
             echo "EOF"
           } >> "${GITHUB_OUTPUT}"
 
       - name: Validate public application configuration
         shell: bash
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
         run: |
           if [[ "${NEXT_PUBLIC_SUPABASE_URL}" != https://* ]]; then
-            echo "::error::Set the NEXT_PUBLIC_SUPABASE_URL repository variable to the HTTPS Supabase project URL."
+            echo "::error::Set the NEXT_PUBLIC_SUPABASE_URL environment secret to the HTTPS Supabase project URL."
             exit 1
           fi
 
           if [[ "${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}" != sb_publishable_* ]]; then
-            echo "::error::Set the NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY repository variable to the project's publishable key."
+            echo "::error::Set the NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY environment secret to the project's publishable key."
             exit 1
           fi
 
@@ -78,7 +82,7 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
           build-args: |
-            NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
