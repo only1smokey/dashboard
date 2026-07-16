@@ -179,9 +179,6 @@ export function UsersAdmin({
             aria-hidden="true"
           />
           <h2 className="mt-3 font-medium">{t("emptyTitle")}</h2>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {t("emptyDescription")}
-          </p>
         </CardContent>
       </Card>
     );

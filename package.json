@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --experimental-strip-types --test src/config/env.test.ts src/modules/auth/authorization.test.ts src/modules/auth/passkeys.test.ts src/modules/auth/routing.test.ts src/modules/auth/schemas.test.ts src/modules/profile/schemas.test.ts src/modules/settings/passkeys.test.ts src/modules/admin/schemas.test.ts",
+    "test": "node --experimental-strip-types --test src/config/env.test.ts src/modules/auth/authorization.test.ts src/modules/auth/passkeys.test.ts src/modules/auth/routing.test.ts src/modules/auth/schemas.test.ts src/modules/profile/schemas.test.ts src/modules/settings/passkeys.test.ts src/modules/admin/schemas.test.ts src/modules/location/location.test.ts",
     "supabase:check": "node --env-file=.env.local --experimental-strip-types scripts/verify-supabase.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

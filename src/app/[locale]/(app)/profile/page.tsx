@@ -21,7 +21,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-8">
-      <PageHeading title={t("title")} description={t("intro")} />
+      <PageHeading title={t("title")} />
       <Card className="max-w-2xl shadow-xs">
         <CardContent>
           <ProfileForm

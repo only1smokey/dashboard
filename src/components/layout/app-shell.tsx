@@ -4,17 +4,24 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getTranslations } from "next-intl/server";
 import type { AppLocale } from "@/i18n/routing";
 import type { CurrentUserAccess } from "@/modules/auth/server/access";
+import type { ViewingRegion } from "@/modules/location/types";
+import { getAvailableNavigationModules } from "@/modules/registry";
 
 export async function AppShell({
   children,
   locale,
   user,
+  viewingRegion,
 }: {
   children: React.ReactNode;
   locale: AppLocale;
   user: CurrentUserAccess;
+  viewingRegion: ViewingRegion | null;
 }) {
   const t = await getTranslations("Common");
+  const availableModuleIds = getAvailableNavigationModules(viewingRegion).map(
+    (module) => module.id,
+  );
 
   return (
     <SidebarProvider>
@@ -27,6 +34,7 @@ export async function AppShell({
       <AppSidebar
         accountLabel={user.displayName ?? user.email ?? t("account")}
         avatarUrl={user.avatarUrl}
+        availableModuleIds={availableModuleIds}
         displayName={user.displayName}
         isAdmin={user.role === "admin"}
       />

@@ -14,11 +14,8 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <PageHeading title={t("title")} description={t("intro")} />
-      <HomeEmptyState
-        title={t("emptyTitle")}
-        description={t("emptyDescription")}
-      />
+      <PageHeading title={t("title")} />
+      <HomeEmptyState title={t("emptyTitle")} />
     </div>
   );
 }

@@ -1,20 +1,8 @@
 import { LayoutDashboard } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export function HomeEmptyState({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+export function HomeEmptyState({ title }: { title: string }) {
   return (
     <Card className="border-dashed shadow-xs">
       <CardHeader className="items-center px-6 pt-10 text-center sm:px-10 sm:pt-14">
@@ -22,9 +10,6 @@ export function HomeEmptyState({
           <LayoutDashboard className="size-5" aria-hidden="true" />
         </div>
         <CardTitle className="text-lg">{title}</CardTitle>
-        <CardDescription className="max-w-lg leading-6">
-          {description}
-        </CardDescription>
       </CardHeader>
       <CardContent className="pb-10 sm:pb-14" />
     </Card>

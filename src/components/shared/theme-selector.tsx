@@ -26,7 +26,9 @@ export function ThemeSelector({ showLabel = false }: { showLabel?: boolean }) {
           variant="outline"
           size={showLabel ? "default" : "icon"}
           className={
-            showLabel ? "min-h-11 min-w-36 justify-start" : "size-11 md:size-9"
+            showLabel
+              ? "min-h-11 min-w-36 justify-start sm:min-h-9"
+              : "size-11 md:size-9"
           }
           aria-label={t("label")}
         >

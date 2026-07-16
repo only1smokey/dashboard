@@ -29,7 +29,7 @@ export function LanguageSelector() {
   return (
     <Select value={locale} onValueChange={changeLocale}>
       <SelectTrigger
-        className="min-h-11 w-full sm:w-64"
+        className="min-h-11 w-full sm:min-h-9 sm:w-64"
         aria-label={t("languageLabel")}
       >
         <Languages aria-hidden="true" />

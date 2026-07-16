@@ -2,11 +2,14 @@
 
 The application is fail-closed: authenticated dashboard routes require a valid
 Supabase JWT plus an active row in `public.user_roles`. Login and authorization
-will not work until both versioned migrations are applied to the same Supabase
+will not work until all versioned migrations are applied to the same Supabase
 project used by `.env.local`:
 
 1. `migrations/20260714120000_auth_foundation.sql`
 2. `migrations/20260714160000_profiles_avatars_admin.sql`
+3. `migrations/20260716120000_user_locations.sql`
+4. `migrations/20260716160000_photon_user_locations.sql`
+5. `migrations/20260716190000_user_locations_delete_access.sql`
 
 ## Apply the migration
 
@@ -19,9 +22,14 @@ so it was not applied automatically.
 2. Open **SQL Editor > New query**.
 3. Copy and run the complete contents of the authentication-foundation migration.
 4. Open a new query, then copy and run the complete contents of the profiles,
-   avatars, and admin migration. Do not run isolated fragments or reverse the order.
-5. Confirm that `public.profiles` and `public.user_roles` exist with RLS enabled,
-   and that **Storage > Buckets** shows a private `avatars` bucket.
+   avatars, and admin migration.
+5. Open a new query for each location migration and run them in order. The
+   Photon migration replaces the earlier Open-Meteo table and clears any
+   incompatible saved locations. Do not run isolated fragments or reverse the
+   order.
+6. Confirm that `public.profiles`, `public.user_roles`, and
+   `public.user_locations` exist with RLS enabled, and that **Storage > Buckets**
+   shows a private `avatars` bucket.
 
 ### Supabase CLI
 
@@ -94,6 +102,10 @@ manually whenever `APP_DOMAIN` or `APP_URL` changes.
 - `user_roles` contains authorization data. Users can read their own role and
   active status; active administrators can read all roles. Neither receives
   insert, update, or delete privileges through the application API.
+- `user_locations` keeps each Photon country selection and its optional address
+  separately for home and viewing. Active users can read, insert, update, and
+  delete only their own rows; other household members and anonymous requests
+  cannot read this location data.
 - Anonymous database requests receive no table privileges or policies.
 - `private.is_admin()` has an empty search path, accepts no user ID, derives the
   caller from `auth.uid()`, and avoids recursive role policies.

@@ -227,15 +227,12 @@ export function PasskeyManager({
   }
 
   return (
-    <div className="space-y-5">
-      <h3 className="font-medium">{t("title")}</h3>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-muted-foreground text-sm leading-6">
-          {t("managementHint")}
-        </p>
+    <div className="min-w-0 space-y-3">
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <h3 className="truncate font-medium">{t("title")}</h3>
         <Button
           type="button"
-          className="min-h-11 shrink-0"
+          className="min-h-11 shrink-0 sm:min-h-9"
           disabled={isRegistering || availability !== "available"}
           onClick={registerPasskey}
         >
@@ -265,38 +262,35 @@ export function PasskeyManager({
       ) : null}
 
       {loadError ? (
-        <div className="space-y-3 rounded-lg border p-4">
+        <div className="space-y-2 rounded-lg border p-3">
           <p className="text-muted-foreground text-sm" role="status">
             {t(errorMessageKeys[loadError])}
           </p>
           <Button
             type="button"
             variant="outline"
-            className="min-h-11"
+            className="min-h-11 sm:min-h-9"
             onClick={refreshPasskeys}
           >
             {t("retry")}
           </Button>
         </div>
       ) : passkeys.length === 0 ? (
-        <div className="bg-muted/40 rounded-lg border border-dashed p-5 text-center">
+        <div className="bg-muted/40 flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5">
           <KeyRound
-            className="text-muted-foreground mx-auto mb-2 size-5"
+            className="text-muted-foreground size-5 shrink-0"
             aria-hidden="true"
           />
           <p className="font-medium">{t("emptyTitle")}</p>
-          <p className="text-muted-foreground mt-1 text-sm leading-6">
-            {t("emptyDescription")}
-          </p>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="min-w-0 divide-y rounded-lg border">
           {passkeys.map((passkey) => {
             const isEditing = editingId === passkey.id;
             const isPending = pendingId === passkey.id;
 
             return (
-              <li key={passkey.id} className="min-w-0 rounded-xl border p-4">
+              <li key={passkey.id} className="min-w-0 p-3">
                 {isEditing ? (
                   <div className="space-y-3">
                     <div className="space-y-2">
@@ -307,7 +301,7 @@ export function PasskeyManager({
                         id={`passkey-name-${passkey.id}`}
                         value={friendlyName}
                         maxLength={PASSKEY_FRIENDLY_NAME_MAX_LENGTH}
-                        className="h-11"
+                        className="h-11 sm:h-9"
                         disabled={isPending}
                         aria-invalid={nameError}
                         aria-describedby={
@@ -333,7 +327,7 @@ export function PasskeyManager({
                     <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
-                        className="min-h-11"
+                        className="min-h-11 sm:min-h-9"
                         disabled={isPending}
                         onClick={() => renamePasskey(passkey.id)}
                       >
@@ -350,7 +344,7 @@ export function PasskeyManager({
                       <Button
                         type="button"
                         variant="outline"
-                        className="min-h-11"
+                        className="min-h-11 sm:min-h-9"
                         disabled={isPending}
                         onClick={cancelRename}
                       >
@@ -360,12 +354,12 @@ export function PasskeyManager({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="truncate font-medium">
                         {passkey.friendly_name ?? t("unnamedPasskey")}
                       </p>
-                      <dl className="text-muted-foreground mt-2 grid gap-x-5 gap-y-1 text-sm sm:grid-cols-2">
+                      <dl className="text-muted-foreground mt-1 grid gap-x-5 gap-y-0.5 text-xs sm:grid-cols-2">
                         <div>
                           <dt className="inline font-medium">
                             {t("createdDate")}:{" "}
@@ -390,7 +384,7 @@ export function PasskeyManager({
                       <Button
                         type="button"
                         variant="outline"
-                        className="min-h-11"
+                        className="min-h-11 sm:min-h-9"
                         onClick={() => beginRename(passkey)}
                       >
                         <Pencil aria-hidden="true" />
@@ -399,7 +393,7 @@ export function PasskeyManager({
                       <Button
                         type="button"
                         variant="outline"
-                        className="text-destructive hover:text-destructive min-h-11"
+                        className="text-destructive hover:text-destructive min-h-11 sm:min-h-9"
                         onClick={() => setPasskeyToDelete(passkey)}
                       >
                         <Trash2 aria-hidden="true" />

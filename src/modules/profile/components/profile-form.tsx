@@ -186,14 +186,9 @@ export function ProfileForm({
   return (
     <div className="space-y-8">
       <section className="space-y-4" aria-labelledby="avatar-heading">
-        <div>
-          <h2 id="avatar-heading" className="font-medium">
-            {t("avatarTitle")}
-          </h2>
-          <p className="text-muted-foreground mt-1 text-sm leading-6">
-            {t("avatarDescription")}
-          </p>
-        </div>
+        <h2 id="avatar-heading" className="font-medium">
+          {t("avatarTitle")}
+        </h2>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <MemberAvatar
             avatarUrl={avatarUrl}
@@ -261,7 +256,6 @@ export function ProfileForm({
             ) : null}
           </div>
         </div>
-        <p className="text-muted-foreground text-xs">{t("avatarHint")}</p>
       </section>
 
       <form
@@ -331,7 +325,6 @@ export function ProfileForm({
               </Select>
             )}
           />
-          <p className="text-muted-foreground text-sm">{t("languageHint")}</p>
         </div>
         <Button
           type="submit"

@@ -41,3 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 *.sql
+!supabase/migrations/20260716120000_user_locations.sql
+!supabase/migrations/20260716160000_photon_user_locations.sql
+
+supabase/*

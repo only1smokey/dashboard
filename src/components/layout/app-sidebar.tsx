@@ -18,17 +18,19 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Link, usePathname } from "@/i18n/navigation";
-import { navigationModules } from "@/modules/registry";
+import { navigationModules, type ModuleId } from "@/modules/registry";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 
 export function AppSidebar({
   accountLabel,
   avatarUrl,
+  availableModuleIds,
   displayName,
   isAdmin,
 }: {
   accountLabel: string;
   avatarUrl: string | null;
+  availableModuleIds: readonly ModuleId[];
   displayName: string | null;
   isAdmin: boolean;
 }) {
@@ -59,7 +61,11 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationModules
-                .filter((module) => !("adminOnly" in module) || isAdmin)
+                .filter(
+                  (module) =>
+                    availableModuleIds.includes(module.id) &&
+                    (!("adminOnly" in module) || isAdmin),
+                )
                 .map((module) => {
                   const isActive =
                     module.route === "/"

@@ -4,10 +4,13 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { LanguageSelector } from "@/components/shared/language-selector";
 import { PageHeading } from "@/components/shared/page-heading";
 import { ThemeSelector } from "@/components/shared/theme-selector";
+import { Accordion } from "@/components/ui/accordion";
 import type { AppLocale } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { mapPasskeyError } from "@/modules/auth/passkeys";
 import { requireActiveUser } from "@/modules/auth/server/access";
+import { LocationSettingsForm } from "@/modules/location/components/location-settings-form";
+import { getUserLocations } from "@/modules/location/server/data";
 import { PasskeyManager } from "@/modules/settings/components/passkey-manager";
 import { SettingsPanel } from "@/modules/settings/components/settings-panel";
 
@@ -18,41 +21,55 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function SettingsPage() {
   const locale = (await getLocale()) as AppLocale;
-  await requireActiveUser(locale);
-  const [t, tPasskeys] = await Promise.all([
-    getTranslations("Settings"),
-    getTranslations("Passkeys"),
-  ]);
+  const user = await requireActiveUser(locale);
   const supabase = await createClient();
-  const { data: passkeys, error } = await supabase.auth.passkey.list();
+  const [t, tLocation, tPasskeys, locations, passkeyResult] = await Promise.all(
+    [
+      getTranslations("Settings"),
+      getTranslations("Location"),
+      getTranslations("Passkeys"),
+      getUserLocations(user.userId),
+      supabase.auth.passkey.list(),
+    ],
+  );
+  const homeLocation =
+    locations.find((location) => location.kind === "home") ?? null;
+  const viewingLocation =
+    locations.find((location) => location.kind === "viewing") ?? null;
 
   return (
-    <div className="space-y-8">
-      <PageHeading title={t("title")} description={t("intro")} />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <SettingsPanel
-          title={t("appearanceTitle")}
-          description={t("appearanceDescription")}
-        >
+    <div className="min-w-0 space-y-4 sm:space-y-6">
+      <PageHeading title={t("title")} />
+      <Accordion
+        type="multiple"
+        defaultValue={["location"]}
+        className="bg-card text-card-foreground ring-foreground/10 min-w-0 rounded-xl shadow-xs ring-1"
+      >
+        <SettingsPanel value="appearance" title={t("appearanceTitle")}>
           <ThemeSelector showLabel />
         </SettingsPanel>
-        <SettingsPanel
-          title={t("languageTitle")}
-          description={t("languageDescription")}
-        >
+        <SettingsPanel value="language" title={t("languageTitle")}>
           <LanguageSelector />
         </SettingsPanel>
         <SettingsPanel
-          className="lg:col-span-2"
-          title={tPasskeys("security")}
-          description={tPasskeys("securityDescription")}
+          value="location"
+          className="overflow-visible"
+          title={tLocation("title")}
         >
-          <PasskeyManager
-            initialPasskeys={passkeys ?? []}
-            initialError={error ? mapPasskeyError(error) : null}
+          <LocationSettingsForm
+            initialHomeLocation={homeLocation}
+            initialViewingLocation={viewingLocation}
           />
         </SettingsPanel>
-      </div>
+        <SettingsPanel value="security" title={tPasskeys("security")}>
+          <PasskeyManager
+            initialPasskeys={passkeyResult.data ?? []}
+            initialError={
+              passkeyResult.error ? mapPasskeyError(passkeyResult.error) : null
+            }
+          />
+        </SettingsPanel>
+      </Accordion>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import { Info } from "lucide-react";
 
 import { PageHeading } from "@/components/shared/page-heading";
 import type { AppLocale } from "@/i18n/routing";
@@ -21,14 +20,7 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeading title={t("title")} description={t("intro")} />
-      <div
-        className="bg-muted/50 text-muted-foreground flex gap-3 rounded-lg border p-4 text-sm leading-6"
-        role="note"
-      >
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>{t("emailLimitation")}</p>
-      </div>
+      <PageHeading title={t("title")} />
       <UsersAdmin users={data.users} currentUserId={data.currentUserId} />
     </div>
   );
